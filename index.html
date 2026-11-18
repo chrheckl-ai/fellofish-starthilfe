@@ -139,6 +139,24 @@ a { color: var(--accent); }
 .path li small { color: var(--muted); font-size: .88rem; line-height: 1.45; }
 .path .note { color: var(--muted); font-size: .95rem; max-width: 70ch; }
 
+/* Vollbild-Intro: nur beim ersten Besuch, überspringbar */
+#intro {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg); transition: opacity .6s ease;
+}
+#intro[hidden] { display: none; }
+#intro.weg { opacity: 0; pointer-events: none; }
+#intro video { width: 100%; height: 100%; object-fit: contain; }
+#intro button {
+  position: absolute; right: 16px; bottom: 16px;
+  font: inherit; font-size: .95rem; color: var(--ink); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; padding: 8px 18px; box-shadow: var(--shadow);
+}
+#intro button:hover { background: var(--accent-soft); }
+#intro button:focus-visible { outline: 3px solid var(--fish); outline-offset: 2px; }
+
 /* Animiertes Schaubild über den Stationskarten */
 .weg-film { display: grid; gap: 6px; }
 .weg-film video {
@@ -344,6 +362,50 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
 </style>
 </head>
 <body>
+<div id="intro" hidden role="dialog" aria-label="Intro-Animation">
+  <video muted playsinline preload="auto"
+    aria-label="Intro: Ein Schülertext bekommt Feedback, wird überarbeitet und abgegeben. Danach: Erste Schritte mit FelloFish."></video>
+  <button type="button">Überspringen</button>
+</div>
+<script>
+/* Vollbild-Intro beim ersten Besuch (erneut ansehen: Adresse mit #intro) */
+(function () {
+  var intro = document.getElementById("intro");
+  var video = intro.querySelector("video");
+  var KEY = "fellofish-starthilfe-intro-gesehen";
+  var root = document.documentElement;
+  var gesehen = false;
+  try { gesehen = localStorage.getItem(KEY) === "1"; } catch (e) {}
+  var erzwingen = location.hash === "#intro";
+  var ruhig = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if ((gesehen || ruhig) && !erzwingen) return;
+
+  var t = root.getAttribute("data-theme");
+  var dunkel = t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+  video.src = dunkel ? "assets/intro-dunkel.mp4" : "assets/intro-hell.mp4";
+
+  function schliessen() {
+    if (intro.classList.contains("weg")) return;
+    try { localStorage.setItem(KEY, "1"); } catch (e) {}
+    intro.classList.add("weg");
+    document.removeEventListener("keydown", taste);
+    root.removeAttribute("data-intro");
+    document.dispatchEvent(new Event("fellofish-intro-zu"));
+    if (location.hash === "#intro") history.replaceState(null, "", location.pathname + location.search);
+    setTimeout(function () { intro.hidden = true; video.pause(); }, 650);
+  }
+  function taste(e) { if (e.key === "Escape") schliessen(); }
+
+  root.setAttribute("data-intro", "an");
+  intro.hidden = false;
+  video.addEventListener("ended", schliessen);
+  video.addEventListener("error", schliessen);
+  intro.querySelector("button").addEventListener("click", schliessen);
+  document.addEventListener("keydown", taste);
+  var p = video.play();
+  if (p && p.catch) p.catch(schliessen);
+})();
+</script>
 <header class="wrap hero">
   <span class="eyebrow">Freiherr-vom-Stein-Gymnasium · Mikrofortbildung</span>
   <h1>Erste Schritte mit FelloFish</h1>
@@ -1226,10 +1288,18 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
     return;
   }
   if (!("IntersectionObserver" in window)) { abspielen(); return; }
-  var io = new IntersectionObserver(function (eintraege) {
-    if (eintraege[0].isIntersecting) { io.disconnect(); abspielen(); }
-  }, { threshold: 0.5 });
-  io.observe(video);
+  // Läuft noch das Vollbild-Intro, wartet das Schaubild, bis es geschlossen ist
+  function beobachten() {
+    var io = new IntersectionObserver(function (eintraege) {
+      if (eintraege[0].isIntersecting) { io.disconnect(); abspielen(); }
+    }, { threshold: 0.5 });
+    io.observe(video);
+  }
+  if (root.getAttribute("data-intro") === "an") {
+    document.addEventListener("fellofish-intro-zu", function () { setTimeout(beobachten, 300); }, { once: true });
+  } else {
+    beobachten();
+  }
 })();
 </script>
 </body>
