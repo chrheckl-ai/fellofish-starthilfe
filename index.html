@@ -81,6 +81,8 @@ a { color: var(--accent); }
 .eyebrow {
   font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent);
 }
+.eyebrow .lizenz { white-space: nowrap; text-transform: none; letter-spacing: .02em; font-weight: 400; color: var(--muted); }
+.eyebrow .lizenz a { color: inherit; }
 .lead { font-size: 1.15rem; max-width: 62ch; color: var(--ink); }
 .loop {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px;
@@ -95,8 +97,11 @@ a { color: var(--accent); }
 /* Navigation */
 .nav {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(6px); border-bottom: 1px solid var(--line);
+  /* hellgrün hinterlegt, damit sich die Leiste vom Seitenhintergrund abhebt */
+  background: color-mix(in srgb, var(--accent-soft) 95%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  box-shadow: 0 4px 14px rgba(23, 37, 31, .08);
 }
 .nav .wrap { overflow-x: auto; scrollbar-width: none; }
 .nav .wrap::-webkit-scrollbar { display: none; }
@@ -105,7 +110,7 @@ a { color: var(--accent); }
   display: inline-flex; align-items: center; gap: 7px; text-decoration: none; color: var(--ink);
   font-size: .9rem; padding: 6px 10px; border-radius: 999px;
 }
-.nav a:hover { background: var(--accent-soft); }
+.nav a:hover { background: var(--surface); }
 .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
 
 /* Weg einer Aufgabe */
@@ -416,7 +421,7 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
 })();
 </script>
 <header class="wrap hero">
-  <span class="eyebrow">Freiherr-vom-Stein-Gymnasium · Mikrofortbildung</span>
+  <span class="eyebrow">Freiherr-vom-Stein-Gymnasium · Mikrofortbildung <span class="lizenz">(<a href="https://creativecommons.org/licenses/by/4.0/deed.de" rel="license">CC BY 4.0</a> | Christoph Heckl)</span></span>
   <h1>Erste Schritte mit FelloFish</h1>
   <p class="lead"><a href="https://www.fellofish.com" target="_blank" rel="noopener">FelloFish</a> gibt Schülerinnen und Schülern KI-Feedback zu ihren Texten, und zwar auf Grundlage der Kriterien, die du festlegst. Die SuS überarbeiten ihren Text mit diesem Feedback und geben ihn dann ab. Du siehst jederzeit, welches Feedback sie bekommen haben und was sie verändert haben. FelloFish ist DSGVO-konform.</p>
   <div class="loop" aria-label="Ablauf aus Sicht der SuS">
