@@ -117,16 +117,43 @@ a { color: var(--accent); }
 }
 .path li {
   counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
-  padding: 14px 14px 16px; display: grid; gap: 4px; align-content: start;
-  border-top: 4px solid var(--c);
+  display: grid; border-top: 4px solid var(--c);
+  transition: box-shadow .15s ease, translate .15s ease;
 }
-.path li::before {
+/* Jede Karte springt zum passenden Abschnitt */
+.path li a {
+  display: grid; gap: 4px; grid-template-rows: auto auto 1fr auto; padding: 14px 14px 16px;
+  color: inherit; text-decoration: none; border-radius: 0 0 11px 11px;
+}
+.path li:hover { box-shadow: var(--shadow); translate: 0 -2px; }
+.path li a:focus-visible { outline: 3px solid var(--fish); outline-offset: 3px; }
+.path li a::after { content: "Zum Abschnitt ↓"; align-self: end; margin-top: 6px; font-size: .8rem; font-weight: 700; color: var(--c); }
+@media (prefers-reduced-motion: reduce) { .path li { transition: none; } .path li:hover { translate: none; } }
+/* Sprungziel „Fertigstellen“ kurz hervorheben */
+#fertigstellen:target { background: var(--fish-soft); border-radius: 6px; outline: 6px solid var(--fish-soft); }
+.path li a::before {
   content: counter(s); font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; color: var(--c);
   font-variant-numeric: tabular-nums;
 }
 .path li b { font-family: var(--font-display); font-size: 1.05rem; }
 .path li small { color: var(--muted); font-size: .88rem; line-height: 1.45; }
 .path .note { color: var(--muted); font-size: .95rem; max-width: 70ch; }
+
+/* Animiertes Schaubild über den Stationskarten */
+.weg-film { display: grid; gap: 6px; }
+.weg-film video {
+  display: block; width: 100%; height: auto; aspect-ratio: 1920 / 720;
+  border-radius: 12px; border: 1px solid var(--line); background: var(--bg); box-shadow: var(--shadow);
+}
+.weg-film button {
+  justify-self: end;
+  font: inherit; font-size: .85rem; color: var(--muted); cursor: pointer;
+  background: none; border: 0; border-radius: 999px; padding: 4px 10px;
+}
+.weg-film button:hover { color: var(--ink); background: var(--accent-soft); }
+.weg-film button:focus-visible { outline: 3px solid var(--fish); outline-offset: 2px; }
+/* unsichtbar, aber Platz bleibt reserviert, damit nichts springt */
+.weg-film button[hidden] { display: inline-block; visibility: hidden; }
 
 /* Abschnitte */
 section.station { padding-block: 56px 8px; display: grid; gap: 26px; }
@@ -353,13 +380,20 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
 <main>
   <div class="wrap path" id="weg">
     <h2>Von der Vorlage bis zur Auswertung</h2>
+    <div class="weg-film">
+      <video muted playsinline preload="metadata"
+        src="assets/weg-hell.mp4" poster="assets/weg-hell.jpg"
+        data-hell="assets/weg-hell" data-dunkel="assets/weg-dunkel"
+        aria-label="Animation: Ein Fisch schwimmt durch die sechs Stationen. Bei „Fertigstellen“ wird er von grau zu orange, bei „Verteilen“ schwärmen kleine Fische aus."></video>
+      <button type="button" hidden>↻ Nochmal abspielen</button>
+    </div>
     <ol>
-      <li style="--c:var(--st-start)"><b>Vorlage finden</b><small>oder ohne Vorlage starten</small></li>
-      <li style="--c:var(--st-edit)"><b>Bearbeiten</b><small>Aufgabenstellung und Feedbackkriterien</small></li>
-      <li style="--c:var(--st-test)"><b>Testen</b><small>Feedback aus SuS-Sicht prüfen</small></li>
-      <li style="--c:var(--st-edit)"><b>Fertigstellen</b><small>erst danach lässt sich verteilen</small></li>
-      <li style="--c:var(--st-share)"><b>Verteilen</b><small>Link oder QR-Code, Einstellungen, Zeitraum</small></li>
-      <li style="--c:var(--st-results)"><b>Ergebnisse</b><small>Entwurf und Abgabe vergleichen</small></li>
+      <li style="--c:var(--st-start)"><a href="#vorlagen"><b>Vorlage finden</b><small>oder ohne Vorlage starten</small></a></li>
+      <li style="--c:var(--st-edit)"><a href="#bearbeiten"><b>Bearbeiten</b><small>Aufgabenstellung und Feedbackkriterien</small></a></li>
+      <li style="--c:var(--st-test)"><a href="#testen"><b>Testen</b><small>Feedback aus SuS-Sicht prüfen</small></a></li>
+      <li style="--c:var(--st-edit)"><a href="#fertigstellen"><b>Fertigstellen</b><small>erst danach lässt sich verteilen</small></a></li>
+      <li style="--c:var(--st-share)"><a href="#verteilen"><b>Verteilen</b><small>Link oder QR-Code, Einstellungen, Zeitraum</small></a></li>
+      <li style="--c:var(--st-results)"><a href="#ergebnisse"><b>Ergebnisse</b><small>Entwurf und Abgabe vergleichen</small></a></li>
     </ol>
     <p class="note">In jeder Aufgabe findest du links eine Leiste mit den Stationen <span class="ui">Bearbeiten</span>, <span class="ui">Testen</span>, <span class="ui">Verteilen</span> und <span class="ui">Ergebnisse</span>. Diese Seite folgt genau dieser Reihenfolge. Alle Bilder lassen sich zum Vergrößern antippen.</p>
   </div>
@@ -443,7 +477,7 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
         <ul>
           <li>Pflichtfelder sind <span class="ui">Überschrift</span> (für SuS sichtbar), <span class="ui">Fach</span>, <span class="ui">Stufe</span> und <span class="ui">Aufgabenstellung</span>.</li>
           <li>Unter <span class="ui">Material</span> hinterlegst du optional Texte, die die SuS für die Bearbeitung verwenden dürfen.</li>
-          <li>Oben rechts steht <span class="ui">Fertigstellen</span>. Erst wenn du darauf klickst, kannst du die Aufgabe verteilen und Ergebnisse sehen.</li>
+          <li id="fertigstellen">Oben rechts steht <span class="ui">Fertigstellen</span>. Erst wenn du darauf klickst, kannst du die Aufgabe verteilen und Ergebnisse sehen.</li>
         </ul>
       </div>
     </div>
@@ -1144,6 +1178,58 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
     update();
   });
   update();
+})();
+</script>
+<script>
+/* Animiertes Schaubild: spielt einmal ab, sobald es ins Bild kommt */
+(function () {
+  var box = document.querySelector(".weg-film");
+  if (!box) return;
+  var video = box.querySelector("video");
+  var knopf = box.querySelector("button");
+  var root = document.documentElement;
+  var dunkelMQ = window.matchMedia("(prefers-color-scheme: dark)");
+  var ruhig = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var gespielt = false;
+
+  function istDunkel() {
+    var t = root.getAttribute("data-theme");
+    return t === "dark" || (t !== "light" && dunkelMQ.matches);
+  }
+  function quelleSetzen() {
+    var basis = istDunkel() ? video.dataset.dunkel : video.dataset.hell;
+    if (video.dataset.aktuell === basis) return;
+    video.dataset.aktuell = basis;
+    video.poster = basis + ".jpg";
+    video.src = basis + ".mp4";
+    // nach dem Abspielen bzw. ohne Abspielen das Endbild zeigen
+    if (gespielt || ruhig) video.addEventListener("loadedmetadata", function () {
+      video.currentTime = video.duration;
+    }, { once: true });
+  }
+  function abspielen() {
+    gespielt = true;
+    knopf.hidden = true;
+    video.currentTime = 0;
+    var p = video.play();
+    if (p && p.catch) p.catch(function () { knopf.hidden = false; });
+  }
+
+  quelleSetzen();
+  if (dunkelMQ.addEventListener) dunkelMQ.addEventListener("change", quelleSetzen);
+  video.addEventListener("ended", function () { knopf.hidden = false; });
+  knopf.addEventListener("click", abspielen);
+
+  if (ruhig) {
+    knopf.textContent = "▶ Animation abspielen";
+    knopf.hidden = false;
+    return;
+  }
+  if (!("IntersectionObserver" in window)) { abspielen(); return; }
+  var io = new IntersectionObserver(function (eintraege) {
+    if (eintraege[0].isIntersecting) { io.disconnect(); abspielen(); }
+  }, { threshold: 0.5 });
+  io.observe(video);
 })();
 </script>
 </body>
