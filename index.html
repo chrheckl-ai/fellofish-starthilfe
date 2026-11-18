@@ -146,6 +146,8 @@ a { color: var(--accent); }
   background: var(--bg); transition: opacity .6s ease;
 }
 #intro[hidden] { display: none; }
+/* Seite dahinter nicht scrollbar, solange das Intro läuft */
+html[data-intro="an"], html[data-intro="an"] body { overflow: hidden; }
 #intro.weg { opacity: 0; pointer-events: none; }
 #intro video { width: 100%; height: 100%; object-fit: contain; }
 #intro button {
@@ -390,12 +392,19 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
     intro.classList.add("weg");
     document.removeEventListener("keydown", taste);
     root.removeAttribute("data-intro");
+    nachOben();
     document.dispatchEvent(new Event("fellofish-intro-zu"));
     if (location.hash === "#intro") history.replaceState(null, "", location.pathname + location.search);
     setTimeout(function () { intro.hidden = true; video.pause(); }, 650);
   }
   function taste(e) { if (e.key === "Escape") schliessen(); }
 
+  // immer oben beginnen, auch wenn der Browser die alte Position wiederherstellen will
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  function nachOben() { window.scrollTo({ top: 0, left: 0, behavior: "instant" }); }
+  nachOben();
+  window.addEventListener("load", nachOben, { once: true });
+  window.addEventListener("pageshow", nachOben, { once: true });
   root.setAttribute("data-intro", "an");
   intro.hidden = false;
   video.addEventListener("ended", schliessen);
