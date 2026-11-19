@@ -6,9 +6,7 @@
 <meta name="description" content="Nachschlageseite zur FelloFish-Mikrofortbildung am Freiherr-vom-Stein-Gymnasium Leverkusen">
 <title>Erste Schritte mit FelloFish</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
 <style>
 /* Layout: ein ruhiges Nachschlagewerk; eine Stationsleiste wie in FelloFish führt durch Bearbeiten, Testen, Verteilen, Ergebnisse. */
 :root {
@@ -1023,6 +1021,7 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
 <footer class="wrap">
   <p>Stand: November 2026 · Christoph Heckl, Freiherr-vom-Stein-Gymnasium Leverkusen</p>
   <p>Screenshots aus FelloFish. Namen von SuS sowie Aufgabenlink und QR-Code sind unkenntlich gemacht.</p>
+  <p><a href="datenschutz.html">Datenschutz</a></p>
 </footer>
 
 <dialog id="zoom" aria-label="Großansicht">
@@ -1030,7 +1029,7 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
   <img id="zoom-img" alt="">
 </dialog>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="assets/jszip.min.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
