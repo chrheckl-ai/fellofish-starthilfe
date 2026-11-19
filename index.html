@@ -409,6 +409,39 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
 }
 @media (prefers-reduced-motion: reduce) { .ziel-blink { animation: none; outline: 3px solid var(--fish); } }
 
+
+/* Große Bildschirme: Seitenleiste links, Bild und Erklärung nebeneinander */
+.nav .nav-titel, .nav-such-platz { display: none; }
+@media (min-width: 1200px) {
+  html { scroll-padding-top: 24px; }
+  body { padding-left: 290px; }
+  .wrap { max-width: 1400px; }
+  .nav {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 290px;
+    border-bottom: none; border-right: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+    box-shadow: 4px 0 14px rgba(23, 37, 31, .06);
+  }
+  .nav .wrap { height: 100%; overflow-y: auto; padding: 24px 18px; display: flex; flex-direction: column; gap: 16px; max-width: none; }
+  .nav .nav-titel { display: block; font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; line-height: 1.2; color: var(--ink); text-decoration: none; }
+  .nav-such-platz { display: grid; gap: 8px; }
+  .nav-such-platz .such-zeile input { font-size: .95rem; padding: 8px 12px 8px 38px; }
+  .nav-such-platz .such-zeile svg { left: 12px; }
+  .nav .nav-such-platz .such-treffer a { display: grid; gap: 2px; padding: 6px 10px; font-size: .9rem; white-space: normal; }
+  .nav .nav-such-platz .such-treffer { max-height: 55vh; overflow-y: auto; }
+  .nav-such-platz .such-treffer small { font-size: .8rem; }
+  .nav-such-platz .such-status { font-size: .82rem; }
+  .nav ul { flex-direction: column; padding: 0; gap: 2px; white-space: normal; }
+  .nav a { display: flex; padding: 7px 10px; font-size: .95rem; border-radius: 10px; }
+  .nav a.aktuell { background: var(--surface); font-weight: 700; box-shadow: var(--shadow); }
+  .nav .nav-suche-li { display: none; }
+  .finden { max-width: none; }
+
+  /* Screenshot links, Erklärungen rechts */
+  .shot { grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr); column-gap: 32px; align-items: start; }
+  .shot > figure { grid-column: 1; grid-row: 1 / span 6; }
+  .shot > :not(figure) { grid-column: 2; }
+  .shot > figure.narrow { max-width: none; }
+}
 </style>
 </head>
 <body>
@@ -496,8 +529,10 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
 
 <nav class="nav" aria-label="Abschnitte">
   <div class="wrap">
+    <a class="nav-titel" href="#">Erste Schritte mit FelloFish</a>
+    <div class="nav-such-platz" id="nav-such-platz"></div>
     <ul>
-      <li><a href="#finden" class="nav-suche"><svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>Suchen</a></li>
+      <li class="nav-suche-li"><a href="#finden" class="nav-suche"><svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>Suchen</a></li>
       <li><a href="#ueberblick"><span class="dot" style="background:var(--st-start)"></span>Überblick</a></li>
       <li><a href="#vorlagen"><span class="dot" style="background:var(--st-start)"></span>Vorlagen</a></li>
       <li><a href="#bearbeiten"><span class="dot" style="background:var(--st-edit)"></span>Bearbeiten</a></li>
@@ -1548,6 +1583,42 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
   document.querySelectorAll('a[href="#finden"]').forEach(function (a) {
     a.addEventListener("click", function () { setTimeout(function () { feld.focus({ preventScroll: true }); }, 350); });
   });
+})();
+</script>
+<script>
+/* Große Bildschirme: Suchfeld in die Seitenleiste verschieben, aktuellen Abschnitt markieren */
+(function () {
+  var mq = matchMedia("(min-width: 1200px)");
+  var platz = document.getElementById("nav-such-platz");
+  var finden = document.getElementById("finden");
+  if (!platz || !finden) return;
+  var teile = ["such-zeile", "such-status", "such-treffer"].map(function (k) { return finden.querySelector("." + k); });
+  var titel = finden.querySelector(".finden-titel");
+  var feld = document.getElementById("such-feld"), platzhalter = feld.placeholder;
+  var stichwoerter = document.getElementById("stichwoerter");
+  function setzen() {
+    if (mq.matches) {
+      teile.forEach(function (el) { platz.appendChild(el); });
+      titel.textContent = "Häufige Fragen"; feld.placeholder = "Suchen, z. B. Zeitraum";
+    } else {
+      teile.forEach(function (el) { finden.insertBefore(el, stichwoerter); });
+      titel.textContent = "Was möchtest du wissen?"; feld.placeholder = platzhalter;
+    }
+  }
+  setzen();
+  if (mq.addEventListener) mq.addEventListener("change", setzen);
+
+  var links = {};
+  document.querySelectorAll('.nav ul a[href^="#"]').forEach(function (a) { links[a.getAttribute("href").slice(1)] = a; });
+  var abschnitte = Object.keys(links).map(function (id) { return document.getElementById(id); }).filter(Boolean);
+  if (!("IntersectionObserver" in window)) return;
+  var sichtbar = {};
+  var beob = new IntersectionObserver(function (eintraege) {
+    eintraege.forEach(function (e) { sichtbar[e.target.id] = e.isIntersecting; });
+    var aktuell = abschnitte.filter(function (s) { return sichtbar[s.id]; })[0];
+    Object.keys(links).forEach(function (id) { links[id].classList.toggle("aktuell", !!aktuell && aktuell.id === id); });
+  }, { rootMargin: "-20% 0px -60% 0px" });
+  abschnitte.forEach(function (s) { beob.observe(s); });
 })();
 </script>
 </body>
