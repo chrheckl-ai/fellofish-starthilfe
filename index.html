@@ -161,6 +161,16 @@ html[data-intro="an"], html[data-intro="an"] body { overflow: hidden; }
 }
 #intro button:hover { background: var(--accent-soft); }
 #intro button:focus-visible { outline: 3px solid var(--fish); outline-offset: 2px; }
+/* Fortschrittsleiste: zeigt, wie lange das Intro noch läuft */
+#intro .intro-leiste {
+  position: absolute; left: 0; right: 0; bottom: env(safe-area-inset-bottom, 0px);
+  height: 5px; background: var(--line);
+}
+#intro .intro-leiste span {
+  display: block; height: 100%; width: 100%; background: var(--accent);
+  transform-origin: left center; transform: scaleX(0);
+}
+#intro button { bottom: calc(16px + 5px + env(safe-area-inset-bottom, 0px)); }
 
 /* Animiertes Schaubild über den Stationskarten */
 .weg-film { display: grid; gap: 6px; }
@@ -449,7 +459,8 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
 <div id="intro" hidden role="dialog" aria-label="Intro-Animation">
   <video muted playsinline preload="auto"
     aria-label="Intro: Ein Schülertext bekommt Feedback, wird überarbeitet und abgegeben. Danach: Erste Schritte mit FelloFish."></video>
-  <button type="button">Überspringen</button>
+  <div class="intro-leiste" aria-hidden="true"><span></span></div>
+  <button type="button">Intro überspringen</button>
 </div>
 <script>
 /* Vollbild-Intro beim ersten Besuch (erneut ansehen: Adresse mit #intro) */
@@ -496,6 +507,12 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
   video.addEventListener("error", schliessen);
   intro.querySelector("button").addEventListener("click", schliessen);
   document.addEventListener("keydown", taste);
+  // Fortschrittsleiste flüssig mitlaufen lassen
+  var balken = intro.querySelector(".intro-leiste span");
+  (function laufen() {
+    if (video.duration) balken.style.transform = "scaleX(" + Math.min(1, video.currentTime / video.duration) + ")";
+    if (!intro.classList.contains("weg")) requestAnimationFrame(laufen);
+  })();
   var p = video.play();
   if (p && p.catch) p.catch(schliessen);
 })();
