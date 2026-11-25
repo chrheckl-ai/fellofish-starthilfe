@@ -170,7 +170,9 @@ html[data-intro="an"], html[data-intro="an"] body { overflow: hidden; }
   display: block; height: 100%; width: 100%; background: var(--accent);
   transform-origin: left center; transform: scaleX(0);
 }
-#intro button { bottom: calc(16px + 5px + env(safe-area-inset-bottom, 0px)); }
+#intro button { bottom: calc(16px + 5px + env(safe-area-inset-bottom, 0px)); transition: opacity .5s ease; }
+/* beim Schlusstitel ist das Intro praktisch vorbei: Button ausblenden */
+#intro button.aus { opacity: 0; pointer-events: none; }
 
 /* Animiertes Schaubild über den Stationskarten */
 .weg-film { display: grid; gap: 6px; }
@@ -509,8 +511,13 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
   document.addEventListener("keydown", taste);
   // Fortschrittsleiste flüssig mitlaufen lassen
   var balken = intro.querySelector(".intro-leiste span");
+  var knopf = intro.querySelector("button");
+  var SCHLUSS = 4.2; // Sekunden vor Ende: Schlusstitel „Erste Schritte mit FelloFish“
   (function laufen() {
-    if (video.duration) balken.style.transform = "scaleX(" + Math.min(1, video.currentTime / video.duration) + ")";
+    if (video.duration) {
+      balken.style.transform = "scaleX(" + Math.min(1, video.currentTime / video.duration) + ")";
+      knopf.classList.toggle("aus", video.currentTime > video.duration - SCHLUSS);
+    }
     if (!intro.classList.contains("weg")) requestAnimationFrame(laufen);
   })();
   var p = video.play();
