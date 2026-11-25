@@ -467,7 +467,9 @@ dialog .close:focus-visible { outline: 3px solid var(--fish); }
 
   var t = root.getAttribute("data-theme");
   var dunkel = t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
-  video.src = dunkel ? "assets/intro-dunkel.mp4" : "assets/intro-hell.mp4";
+  // Hochformat (Handy, Tablet hochkant): eigene Fassung 1080×1920 mit größerer Schrift
+  var hoch = matchMedia("(orientation: portrait)").matches;
+  video.src = "assets/intro-" + (hoch ? "hoch-" : "") + (dunkel ? "dunkel" : "hell") + ".mp4";
 
   function schliessen() {
     if (intro.classList.contains("weg")) return;
